@@ -20,7 +20,6 @@ Thw following table shows the mapping between the paper terms and API prefixes i
 
 The content of this repository is organized as follows:
 - `c/`: external library dependencies (including the thread-safe skip list used as FlexDB's MemTable)
-- `*_benchmark/`: experiment code for FlexTree, FlexSpace and FlexDB (Paper Section 6.1 to 6.3)
 - `flextree.h`, `flextree.c`: FlexTree implementation and its APIs, including reference code of sorted extent array
 - `flexfile.h`, `flexfile.c`: FlexSpace implementation and its APIs
 - `flexdb.h`, `flexdb.c`: FlexDB implementation and its APIs
