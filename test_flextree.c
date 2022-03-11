@@ -567,7 +567,8 @@ static void test9(const u64 count)
     fflush(stdout);
     flextree_close(ft);
     ft = flextree_open(PATH, FLEXTREE_MAX_EXTENT_SIZE_LIMIT);
-    for (u32 i=0; i<100; i++) {
+    for (u32 i=0; i<10000; i++) {
+        printf("round %u\n", i);
         random_append(ft, NULL, count);
         flextree_close(ft);
         ft = flextree_open(PATH, FLEXTREE_MAX_EXTENT_SIZE_LIMIT);
@@ -585,7 +586,7 @@ int main(int argc, char ** argv) {
     char * cmd = argc > 1 ? argv[1] : "0123456789";
     for (u32 i = 0; i < 10; i++) {
       if (strchr(cmd, (char)((u8)'0'+i)) && tests[i])
-        tests[i](500000);
+        tests[i](50000);
     }
     return 0;
 }

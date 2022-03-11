@@ -16,9 +16,7 @@
 #include "generic.h"
 
 // the address space flexfile manages
-#ifdef FLEXFILE_MAX_OFFSET_OVERRIDE
-#define FLEXFILE_MAX_OFFSET FLEXFILE_MAX_OFFSET_OVERRIDE
-#else
+#ifndef FLEXFILE_MAX_OFFSET
 #define FLEXFILE_MAX_OFFSET (800lu << 30) // 800 GB
 #endif
 static_assert(FLEXFILE_MAX_OFFSET >= (4lu << 30), "dont manage small space");
