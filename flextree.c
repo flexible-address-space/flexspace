@@ -17,16 +17,6 @@
 #define FLEXTREE_POFF_MASK (0xffffffffffff) // 48 bits
 #define FLEXTREE_PATH_DEPTH 7 // at most 7 levels
 
-struct flextree_free_list {
-    struct flextree *tree;
-    u64 cap;
-    u64 count;
-    struct {
-        u64 _;
-        u64 v[];
-    } *list;
-};
-
 struct flextree_path {
     u8 level;
     u8 path[FLEXTREE_PATH_DEPTH];
@@ -38,51 +28,55 @@ static_assert(FLEXTREE_INTERNAL_CAP < 254, "u8 for path");
 
 // free_list {{{
 
-static struct flextree_free_list *flextree_free_list_create(struct flextree *const tree)
+struct flextree_free_list {
+    u64 cap;
+    u64 count;
+    u64 *list;
+};
+
+static struct flextree_free_list *flextree_free_list_create()
 {
-    struct flextree_free_list *const ffl = generic_malloc(sizeof(*ffl));
-    ffl->tree = tree;
-    ffl->cap = 1024;
-    ffl->count = 0;
-    ffl->list = generic_malloc(sizeof(*(ffl->list)) + sizeof(u64) * ffl->cap);
-    return ffl;
+    struct flextree_free_list *const fl = generic_malloc(sizeof(*fl));
+    fl->cap = 4096;
+    fl->count = 0;
+    fl->list = generic_malloc(sizeof(fl->list[0]) * fl->cap);
+    return fl;
 }
 
-static void flextree_free_list_extend(struct flextree_free_list *const ffl)
+static void flextree_free_list_extend(struct flextree_free_list *const fl)
 {
-    ffl->list = generic_realloc(
-            ffl->list, sizeof(*ffl->list) + sizeof(u64) * ffl->cap * 2);
-    ffl->cap *= 2;
+    fl->list = generic_realloc(fl->list, sizeof(fl->list[0]) * fl->cap * 2);
+    fl->cap *= 2;
 }
 
-static void flextree_free_list_put(struct flextree_free_list *const ffl, const u64 idx)
+static void flextree_free_list_put(struct flextree_free_list *const fl, const u64 val)
 {
-    if (ffl->cap == ffl->count) {
-        flextree_free_list_extend(ffl);
+    if (fl->cap == fl->count) {
+        flextree_free_list_extend(fl);
     }
-    ffl->list->v[ffl->count++] = idx;
+    fl->list[fl->count++] = val;
 }
 
-static inline u8 flextree_free_list_ne(const struct flextree_free_list *const ffl)
+static inline u8 flextree_free_list_ne(const struct flextree_free_list *const fl)
 {
-    return (ffl->count > 0) ? 1 : 0;
+    return (fl->count > 0) ? 1 : 0;
 }
 
-static inline u64 flextree_free_list_get(struct flextree_free_list *const ffl)
+static inline u64 flextree_free_list_get(struct flextree_free_list *const fl)
 {
-    return ffl->list->v[--ffl->count];
+    return fl->list[--fl->count];
 }
 
-static inline void flextree_free_list_destroy(struct flextree_free_list *const ffl)
+static inline void flextree_free_list_destroy(struct flextree_free_list *const fl)
 {
-    generic_free(ffl->list);
-    generic_free(ffl);
+    generic_free(fl->list);
+    generic_free(fl);
 }
 
-static void flextree_free_list_merge(struct flextree_free_list *const ffl1, const struct flextree_free_list *const ffl2)
+static void flextree_free_list_merge(struct flextree_free_list *const fl1, const struct flextree_free_list *const fl2)
 {
-    for (u64 i=0; i<ffl2->count; i++) {
-        flextree_free_list_put(ffl1, ffl2->list->v[i]);
+    for (u64 i=0; i<fl2->count; i++) {
+        flextree_free_list_put(fl1, fl2->list[i]);
     }
 }
 
@@ -254,6 +248,11 @@ static struct flextree_node *flextree_find_leaf_node(
 
         path->nodes[path->level]  = node;
         path->path[path->level++] = (u8)target; // although it is u32
+        if (path->level > FLEXTREE_PATH_DEPTH) {
+            printf("the tree is too high, panic.\n");
+            fflush(stdout);
+            exit(1);
+        }
         node = ie->children[target].node;
         if (node->is_leaf) {
             *ploff = loff;
@@ -1047,7 +1046,7 @@ struct flextree *flextree_open(const char* const path, const u32 max_extent_size
 
     u8 new = 0;
     tree->node_slab = slab_create(sizeof(struct flextree_node), 1lu << 21);
-    tree->free_list = flextree_free_list_create(tree);
+    tree->free_list = flextree_free_list_create();
 
     if (tree->in_memory_mode) {
         new = 1;
@@ -1102,7 +1101,7 @@ void flextree_sync(struct flextree *const tree)
         return;
     }
     tree->version += 1; // increase the version here
-    struct flextree_free_list *const tffl = flextree_free_list_create(tree);
+    struct flextree_free_list *const tffl = flextree_free_list_create();
     struct flextree_path path;
     path.level = 0;
     flextree_sync_cow_rec(tree->root, &path, tffl);
