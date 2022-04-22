@@ -1,9 +1,11 @@
 # FlexTree, FlexSpace and FlexDB
 
 This repository contains the reference implementation of FlexTree, FlexSpace and FlexDB presented in the paper
-"Building an Efficient Key-value Store Using Lightweight In-place Updates".
+''Building an Efficient Key-value Store Using Lightweight In-place Updates'' on EuroSys 2022.
 
-*More details of the paper are expected to be updated here.*
+[[ACM DL](https://dl.acm.org/doi/10.1145/3492321.3519555)]
+[[Paper PDF](https://www.roychan.org/assets/eurosys22-flex/paper.pdf)]
+[[Slides](https://www.roychan.org/assets/eurosys22-flex/slides.pdf)]
 
 ## Repository Structure
 
@@ -86,3 +88,24 @@ FlexSpace. It will create a FlexSpace in `/tmp` and performs a few I/O operation
 expected output. You can simply run `./test_flexfile.out` to see if the outputs are correct.
 - `test_flexdb.out`: this program tests the basic functionality of FlexDB. It creates a store in `/tmp` and perform a
 range of regular KV operations on it. To run the program, simply use `./test_flexdb.out`.
+
+## Citation (BibTeX)
+
+```
+@inproceedings{10.1145/3492321.3519555,
+author = {Chen, Chen and Zhong, Wenshao and Wu, Xingbo},
+title = {Building an Efficient Key-Value Store in a Flexible Address Space},
+year = {2022},
+isbn = {9781450391627},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3492321.3519555},
+doi = {10.1145/3492321.3519555},
+booktitle = {Proceedings of the Seventeenth European Conference on Computer Systems},
+pages = {51–68},
+numpages = {18},
+keywords = {key-value store, storage, address space},
+location = {Rennes, France},
+series = {EuroSys '22}
+}
+```
