@@ -4,8 +4,8 @@ This repository contains the reference implementation of FlexTree, FlexSpace and
 ''Building an Efficient Key-Value Store in a Flexible Address Space'' on EuroSys 2022.
 
 [[ACM DL](https://dl.acm.org/doi/10.1145/3492321.3519555)]
-[[Paper PDF](https://www.roychan.org/assets/eurosys22-flex/paper.pdf)]
-[[Slides](https://www.roychan.org/assets/eurosys22-flex/slides.pdf)]
+[[Paper PDF](https://www.roychan.org/assets/publications/eurosys22chen.pdf)]
+[[Slides](https://www.roychan.org/assets/publications/eurosys22chen-slides.pdf)]
 
 ## Repository Structure
 
